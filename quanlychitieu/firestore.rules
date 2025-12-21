@@ -1,0 +1,214 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========== HELPER FUNCTIONS ==========
+    
+    // Kiểm tra user đã đăng nhập
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    // Kiểm tra user là chủ sở hữu
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // Kiểm tra user là thành viên của nhóm
+    // Lưu ý: Firestore rules không hỗ trợ kiểm tra trực tiếp trong array of objects
+    // Nên tạm thời cho phép nếu là người tạo hoặc đã đăng nhập
+    // Logic kiểm tra thành viên sẽ được xử lý trong code
+    function isGroupMember(groupId) {
+      return isSignedIn() && 
+             exists(/databases/$(database)/documents/groups/$(groupId));
+    }
+    
+    // Kiểm tra user là người tạo nhóm
+    function isGroupCreator(groupId) {
+      return isSignedIn() && 
+             exists(/databases/$(database)/documents/groups/$(groupId)) &&
+             request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.createdBy;
+    }
+    
+    // ========== USERS COLLECTION ==========
+    match /users/{userId} {
+      allow read, update: if isOwner(userId);
+      allow create: if isSignedIn() && isOwner(userId);
+    }
+    
+    // ========== EXPENSES COLLECTION ==========
+    match /expenses/{expenseId} {
+      // Cho phép đọc nếu:
+      // - Là chủ sở hữu (userId khớp)
+      // - Hoặc là giao dịch nhóm (groupId != null) và user là thành viên nhóm
+      allow read: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.groupId != null && isGroupMember(resource.data.groupId))
+      );
+      
+      // Cho phép tạo nếu là chủ sở hữu
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Cho phép sửa nếu:
+      // - Là chủ sở hữu
+      // - Hoặc là giao dịch nhóm và user là người tạo nhóm (admin)
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.groupId != null && isGroupCreator(resource.data.groupId))
+      );
+      
+      // Cho phép xóa nếu là chủ sở hữu hoặc admin nhóm
+      allow delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid ||
+        (resource.data.groupId != null && isGroupCreator(resource.data.groupId))
+      );
+    }
+    
+    // ========== CATEGORIES COLLECTION ==========
+    match /categories/{categoryId} {
+      allow read: if isSignedIn() && 
+        resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+    
+    // ========== BUDGETS COLLECTION ==========
+    match /budgets/{budgetId} {
+      allow read: if isSignedIn() && 
+        resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+    
+    // ========== REMINDERS COLLECTION ==========
+    match /reminders/{reminderId} {
+      allow read, create, update, delete: if isSignedIn() && 
+        (resource == null || resource.data.userId == request.auth.uid) &&
+        (request.resource == null || request.resource.data.userId == request.auth.uid);
+    }
+    
+    // ========== GROUPS COLLECTION ==========
+    match /groups/{groupId} {
+      // Cho phép đọc nếu đã đăng nhập
+      // Logic kiểm tra thành viên sẽ được xử lý trong code
+      allow read: if isSignedIn();
+      
+      // Cho phép tạo nhóm mới nếu:
+      // - Đã đăng nhập
+      // - createdBy khớp với user hiện tại
+      allow create: if isSignedIn() && 
+        request.resource.data.createdBy == request.auth.uid;
+      
+      // Cho phép cập nhật nếu là người tạo nhóm
+      allow update: if isSignedIn() && 
+        resource.data.createdBy == request.auth.uid;
+      
+      // Chỉ người tạo mới được xóa nhóm
+      allow delete: if isSignedIn() && 
+        resource.data.createdBy == request.auth.uid;
+    }
+    
+    // ========== PROJECTS COLLECTION ==========
+    match /projects/{projectId} {
+      // Cho phép đọc nếu đã đăng nhập
+      allow read: if isSignedIn();
+      
+      // Cho phép tạo nếu là người tạo
+      allow create: if isSignedIn() && 
+        request.resource.data.createdBy == request.auth.uid;
+      
+      // Cho phép cập nhật/xóa nếu:
+      // - Là người tạo dự án
+      // - Hoặc là người tạo nhóm (admin)
+      allow update, delete: if isSignedIn() && (
+        resource.data.createdBy == request.auth.uid ||
+        (resource.data.groupId != null && isGroupCreator(resource.data.groupId))
+      );
+    }
+    
+    // ========== GROUP_INVITATIONS COLLECTION ==========
+    match /group_invitations/{invitationId} {
+      // Cho phép đọc nếu:
+      // - Là người mời
+      // - Hoặc email khớp với email của user hiện tại
+      allow read: if isSignedIn() && (
+        resource.data.invitedBy == request.auth.uid ||
+        resource.data.email == request.auth.token.email
+      );
+      
+      // Cho phép tạo nếu là người mời
+      allow create: if isSignedIn() && 
+        request.resource.data.invitedBy == request.auth.uid;
+      
+      // Cho phép cập nhật nếu:
+      // - Là người mời
+      // - Hoặc email khớp (để đánh dấu đã sử dụng)
+      allow update: if isSignedIn() && (
+        resource.data.invitedBy == request.auth.uid ||
+        resource.data.email == request.auth.token.email
+      );
+    }
+    
+    // ========== APPROVAL_REQUESTS COLLECTION ==========
+    match /approval_requests/{requestId} {
+      // Cho phép đọc nếu đã đăng nhập
+      allow read: if isSignedIn();
+      
+      // Cho phép tạo nếu là người yêu cầu
+      allow create: if isSignedIn() && 
+        request.resource.data.requestedBy == request.auth.uid;
+      
+      // Cho phép cập nhật nếu:
+      // - Là người yêu cầu (để hủy yêu cầu)
+      // - Hoặc là người tạo nhóm (admin để phê duyệt/từ chối)
+      allow update: if isSignedIn() && (
+        resource.data.requestedBy == request.auth.uid ||
+        (resource.data.groupId != null && isGroupCreator(resource.data.groupId))
+      );
+    }
+    
+    // ========== AUDIT_LOGS COLLECTION ==========
+    match /audit_logs/{logId} {
+      // Cho phép đọc nếu đã đăng nhập
+      allow read: if isSignedIn();
+      
+      // Cho phép tạo audit log nếu là người thực hiện hành động
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid;
+    }
+    
+    // ========== DEBTS COLLECTION ==========
+    match /debts/{debtId} {
+      // Cho phép đọc nếu là chủ sở hữu
+      allow read: if isSignedIn() && 
+        resource.data.userId == request.auth.uid;
+      
+      // Cho phép tạo nếu userId khớp với user hiện tại
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Cho phép cập nhật/xóa nếu là chủ sở hữu
+      allow update, delete: if isSignedIn() && 
+        resource.data.userId == request.auth.uid;
+    }
+    
+    // ========== CHAT_HISTORY COLLECTION ==========
+    match /chat_history/{chatId} {
+      // Cho phép đọc nếu là chủ sở hữu
+      allow read: if isSignedIn() && 
+        resource.data.userId == request.auth.uid;
+      
+      // Cho phép tạo nếu userId khớp với user hiện tại
+      allow create: if isSignedIn() && 
+        request.resource.data.userId == request.auth.uid;
+      
+      // Cho phép cập nhật/xóa nếu là chủ sở hữu
+      allow update, delete: if isSignedIn() && 
+        resource.data.userId == request.auth.uid;
+    }
+  }
+}

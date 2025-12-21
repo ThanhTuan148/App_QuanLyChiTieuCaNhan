@@ -18,6 +18,7 @@ import '../providers/reminder_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/category.dart' as app_category;
 import '../providers/category_provider.dart';
+import '../utils/category_emoji_mapper.dart';
 import 'select_repeat_days_screen.dart';
 import 'select_sound_screen.dart';
 
@@ -391,10 +392,9 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
                                 CircleAvatar(
                                   backgroundColor: category.color,
                                   radius: 12,
-                                  child: Icon(
-                                    category.icon,
-                                    size: 12,
-                                    color: Colors.white,
+                                  child: Text(
+                                    CategoryEmojiMapper.getEmojiForIcon(category.icon),
+                                    style: const TextStyle(fontSize: 12),
                                   ),
                                 ),
                                 const SizedBox(width: 8),

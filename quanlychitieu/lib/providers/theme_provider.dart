@@ -21,8 +21,8 @@ class ThemeProvider with ChangeNotifier {
   /// Chế độ theme hiện tại (system/light/dark)
   ThemeMode _themeMode = ThemeMode.system;
 
-  /// Màu sắc chủ đạo đã chọn
-  Color _selectedColor = Colors.blue;
+  /// Màu sắc chủ đạo đã chọn - Green theme từ HTML
+  Color _selectedColor = const Color(0xFF4CAF50); // #4CAF50
 
   ThemeProvider() {
     _loadThemeSettings();
@@ -61,39 +61,167 @@ class ThemeProvider with ChangeNotifier {
     return MaterialColor(color.value, swatch);
   }
 
-  /// Theme cho chế độ sáng
+  /// Theme cho chế độ sáng - Green theme từ HTML
   ThemeData get lightTheme {
     return ThemeData(
       brightness: Brightness.light,
       primarySwatch: _createMaterialColor(_selectedColor),
       primaryColor: _selectedColor,
       indicatorColor: _selectedColor,
+      scaffoldBackgroundColor: const Color(0xFFF4F9F5), // background-light
+      cardColor: Colors.white, // card-light
+      fontFamily: 'Poppins',
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
+        displayMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
+        displaySmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
+        headlineLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+        headlineMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+        headlineSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+        titleLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600),
+        titleMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
+        titleSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
+        bodyLarge: TextStyle(fontFamily: 'Poppins'),
+        bodyMedium: TextStyle(fontFamily: 'Poppins'),
+        bodySmall: TextStyle(fontFamily: 'Poppins'),
+        labelLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
+        labelMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
+        labelSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500),
+      ),
       appBarTheme: AppBarTheme(
-        backgroundColor: _selectedColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: const Color(0xFF1F2937), // text-main-light
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFF1F2937),
+        ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: _selectedColor,
         foregroundColor: Colors.white,
+        elevation: 8,
+      ),
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFFF3F4F6), // gray-50
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _selectedColor,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );
   }
 
-  /// Theme cho chế độ tối
+  /// Theme cho chế độ tối - Green dark theme từ HTML
   ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
       primarySwatch: _createMaterialColor(_selectedColor),
       primaryColor: _selectedColor,
       indicatorColor: _selectedColor,
+      scaffoldBackgroundColor: const Color(0xFF0B140E), // background-dark
+      cardColor: const Color(0xFF16261B), // card-dark
+      fontFamily: 'Poppins',
+      textTheme: const TextTheme(
+        displayLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: Color(0xFFECFDF5)),
+        displayMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: Color(0xFFECFDF5)),
+        displaySmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: Color(0xFFECFDF5)),
+        headlineLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Color(0xFFECFDF5)),
+        headlineMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Color(0xFFECFDF5)),
+        headlineSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Color(0xFFECFDF5)),
+        titleLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, color: Color(0xFFECFDF5)),
+        titleMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Color(0xFFECFDF5)),
+        titleSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Color(0xFFECFDF5)),
+        bodyLarge: TextStyle(fontFamily: 'Poppins', color: Color(0xFFECFDF5)),
+        bodyMedium: TextStyle(fontFamily: 'Poppins', color: Color(0xFFECFDF5)),
+        bodySmall: TextStyle(fontFamily: 'Poppins', color: Color(0xFF9CA3AF)),
+        labelLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Color(0xFFECFDF5)),
+        labelMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Color(0xFFECFDF5)),
+        labelSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, color: Color(0xFF9CA3AF)),
+      ),
       appBarTheme: AppBarTheme(
-        backgroundColor: _selectedColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: const Color(0xFFECFDF5), // text-main-dark
+        titleTextStyle: const TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFFECFDF5),
+        ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: _selectedColor,
         foregroundColor: Colors.white,
+        elevation: 8,
+      ),
+      cardTheme: CardThemeData(
+        color: const Color(0xFF16261B), // card-dark
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFF0B140E), // input-dark
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: Color(0xFF4CAF50), width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _selectedColor,
+          foregroundColor: Colors.white,
+          elevation: 4,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+        ),
       ),
       visualDensity: VisualDensity.adaptivePlatformDensity,
     );
@@ -111,7 +239,7 @@ class ThemeProvider with ChangeNotifier {
     if (colorValue != null) {
       _selectedColor = Color(colorValue);
     } else {
-      _selectedColor = Colors.blue;
+      _selectedColor = const Color(0xFF4CAF50); // Green theme default
     }
     notifyListeners();
   }

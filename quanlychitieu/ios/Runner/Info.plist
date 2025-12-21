@@ -51,5 +51,23 @@
 	<string>Ứng dụng cần quyền truy cập vào camera để cho phép bạn chụp ảnh cho các giao dịch</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Ứng dụng cần quyền truy cập vào microphone khi bạn quay video cho các giao dịch</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.quanlychitieu.payment</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>quanlychitieu</string>
+			</array>
+		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>momo</string>
+		<string>zalopay</string>
+	</array>
 </dict>
 </plist>

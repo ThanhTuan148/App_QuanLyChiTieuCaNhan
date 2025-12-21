@@ -29,6 +29,18 @@ class Expense {
   /// ID của người dùng sở hữu giao dịch này (từ Firebase Auth).
   final String userId;
 
+  /// ID của nhóm (null nếu là giao dịch cá nhân).
+  final String? groupId;
+
+  /// ID của dự án (null nếu không thuộc dự án).
+  final String? projectId;
+
+  /// Trạng thái phê duyệt (null nếu là giao dịch cá nhân hoặc không cần phê duyệt).
+  final bool? isApproved;
+
+  /// ID của người phê duyệt (null nếu chưa được phê duyệt).
+  final String? approvedBy;
+
   /// Constructor để tạo một đối tượng `Expense` mới.
   /// @param id ID của giao dịch (tùy chọn).
   /// @param amount Số tiền.
@@ -37,6 +49,10 @@ class Expense {
   /// @param categoryId ID danh mục.
   /// @param isIncome Là thu nhập hay chi tiêu.
   /// @param userId ID người dùng.
+  /// @param groupId ID nhóm (tùy chọn, cho giao dịch nhóm).
+  /// @param projectId ID dự án (tùy chọn).
+  /// @param isApproved Trạng thái phê duyệt (tùy chọn).
+  /// @param approvedBy ID người phê duyệt (tùy chọn).
   Expense({
     this.id,
     required this.amount,
@@ -45,6 +61,10 @@ class Expense {
     required this.categoryId,
     required this.isIncome,
     required this.userId,
+    this.groupId,
+    this.projectId,
+    this.isApproved,
+    this.approvedBy,
   });
 
   /// Chuyển đổi đối tượng `Expense` thành một Map để lưu trữ trong Firestore.
@@ -58,6 +78,10 @@ class Expense {
       'categoryId': categoryId,
       'isIncome': isIncome,
       'userId': userId,
+      'groupId': groupId,
+      'projectId': projectId,
+      'isApproved': isApproved,
+      'approvedBy': approvedBy,
     };
   }
 
@@ -91,6 +115,16 @@ class Expense {
       categoryId: data['categoryId'].toString(),
       isIncome: data['isIncome'] ?? false,
       userId: data['userId'] ?? '',
+      groupId: data['groupId'],
+      projectId: data['projectId'],
+      isApproved: data['isApproved'],
+      approvedBy: data['approvedBy'],
     );
   }
+
+  /// Kiểm tra xem giao dịch có thuộc nhóm không
+  bool get isGroupExpense => groupId != null && groupId!.isNotEmpty;
+
+  /// Kiểm tra xem giao dịch có cần phê duyệt không
+  bool get needsApproval => isGroupExpense && (isApproved == null || isApproved == false);
 }

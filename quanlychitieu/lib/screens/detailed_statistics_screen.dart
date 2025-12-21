@@ -13,10 +13,12 @@ import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../providers/expense_provider.dart';
 import '../providers/category_provider.dart';
+import '../providers/currency_provider.dart';
 import '../models/expense.dart';
 import '../providers/date_range_provider.dart';
 import '../models/date_range.dart';
 import '../widgets/date_range_selector.dart';
+import '../utils/category_emoji_mapper.dart';
 import 'dart:math' as math;
 
 class DetailedStatisticsScreen extends StatefulWidget {
@@ -31,8 +33,6 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
     with SingleTickerProviderStateMixin {
   // Controller cho TabBar
   late TabController _tabController;
-  // Định dạng tiền tệ theo chuẩn Việt Nam
-  final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
   // Loại nhóm dữ liệu cho biểu đồ cột (ngày/tháng)
   String _barChartGroupBy = 'day';
 
@@ -55,6 +55,7 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
     final expenseProvider = context.watch<ExpenseProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
     final dateRangeProvider = context.watch<DateRangeProvider>();
+    final currencyFormat = context.watch<CurrencyProvider>().currencyFormat;
     final currentRange = dateRangeProvider.currentRange;
 
     // Tính toán các thông số
@@ -111,12 +112,14 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _buildSummaryItem(
+                          context,
                           'Thu nhập',
                           totalIncome,
                           Colors.green,
                         ),
-                        _buildSummaryItem('Chi tiêu', totalExpense, Colors.red),
+                        _buildSummaryItem(context, 'Chi tiêu', totalExpense, Colors.red),
                         _buildSummaryItem(
+                          context,
                           'Cân đối',
                           balance,
                           balance >= 0 ? Colors.blue : Colors.orange,
@@ -140,6 +143,7 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
                       _buildPieChart(expensesByCategory, categoryProvider),
                       _buildBarChart(expenses, currentRange),
                       _buildCategoryExpenseList(
+                        context,
                         expensesByCategory,
                         categoryProvider,
                       ),
@@ -147,9 +151,9 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
                   ),
                 ),
                 // Tab Chi tiêu
-                _buildTransactionList(expenseList, categoryProvider),
+                _buildTransactionList(context, expenseList, categoryProvider),
                 // Tab Thu nhập
-                _buildTransactionList(incomeList, categoryProvider),
+                _buildTransactionList(context, incomeList, categoryProvider),
               ],
             ),
           ),
@@ -159,7 +163,9 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
   }
 
   /// Xây dựng item hiển thị số tiền trong tổng quan
-  Widget _buildSummaryItem(String title, double amount, Color color) {
+  Widget _buildSummaryItem(BuildContext context, String title, double amount, Color color) {
+    final currencyFormat = context.read<CurrencyProvider>().currencyFormat;
+    
     return Column(
       children: [
         Text(title, style: TextStyle(color: color)),
@@ -361,9 +367,11 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
 
   /// Xây dựng danh sách chi tiết chi tiêu theo danh mục
   Widget _buildCategoryExpenseList(
+    BuildContext context,
     Map<String, double> expensesByCategory,
     CategoryProvider categoryProvider,
   ) {
+    final currencyFormat = context.read<CurrencyProvider>().currencyFormat;
     final sortedEntries =
         expensesByCategory.entries.toList()
           ..sort((a, b) => b.value.compareTo(a.value));
@@ -395,7 +403,10 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
                 children: [
                   CircleAvatar(
                     backgroundColor: category.color,
-                    child: Icon(category.icon, color: Colors.white, size: 18),
+                    child: Text(
+                      CategoryEmojiMapper.getEmojiForIcon(category.icon),
+                      style: const TextStyle(fontSize: 18),
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -439,9 +450,11 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
 
   /// Xây dựng danh sách các giao dịch
   Widget _buildTransactionList(
+    BuildContext context,
     List<Expense> transactions,
     CategoryProvider categoryProvider,
   ) {
+    final currencyFormat = context.read<CurrencyProvider>().currencyFormat;
     return transactions.isEmpty
         ? const Center(child: Text('Không có giao dịch nào'))
         : ListView.builder(
@@ -454,7 +467,10 @@ class _DetailedStatisticsScreenState extends State<DetailedStatisticsScreen>
               child: ListTile(
                 leading: CircleAvatar(
                   backgroundColor: category.color,
-                  child: Icon(category.icon, color: Colors.white),
+                  child: Text(
+                    CategoryEmojiMapper.getEmojiForIcon(category.icon),
+                    style: const TextStyle(fontSize: 18),
+                  ),
                 ),
                 title: Text(transaction.description),
                 subtitle: Text(

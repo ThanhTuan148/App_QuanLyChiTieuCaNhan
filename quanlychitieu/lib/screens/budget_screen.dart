@@ -7,10 +7,12 @@ import '../providers/budget_provider.dart';
 import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/currency_provider.dart';
 import '../models/budget.dart';
 import '../models/category.dart' as app_category;
 import '../providers/date_range_provider.dart'; // [SỬA LỖI 1] Thêm import
 import '../models/date_range.dart'; // Thêm import này để truy cập thuộc tính của DateRange
+import '../utils/category_emoji_mapper.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -21,13 +23,13 @@ class BudgetScreen extends StatefulWidget {
 
 // [SỬA LỖI 3] Đổi tên lớp State thành public
 class BudgetScreenState extends State<BudgetScreen> {
-  final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: '₫');
 
   @override
   Widget build(BuildContext context) {
     final budgetProvider = context.watch<BudgetProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
     final expenseProvider = context.watch<ExpenseProvider>();
+    final currencyFormat = context.watch<CurrencyProvider>().currencyFormat;
 
     return Scaffold(
       // Bỏ AppBar ở đây vì nó đã có ở màn hình cha (HomeScreen)
@@ -57,6 +59,7 @@ class BudgetScreenState extends State<BudgetScreen> {
                     category,
                     budget,
                     totalSpent,
+                    currencyFormat,
                   );
                 },
               ),
@@ -68,6 +71,7 @@ class BudgetScreenState extends State<BudgetScreen> {
     app_category.Category category,
     Budget? budget,
     double totalSpent,
+    NumberFormat currencyFormat,
   ) {
     final double budgetAmount = budget?.amount ?? 0;
     final double remaining = budgetAmount - totalSpent;
@@ -85,7 +89,10 @@ class BudgetScreenState extends State<BudgetScreen> {
               children: [
                 CircleAvatar(
                   backgroundColor: category.color,
-                  child: Icon(category.icon, color: Colors.white, size: 20),
+                  child: Text(
+                    CategoryEmojiMapper.getEmojiForIcon(category.icon),
+                    style: const TextStyle(fontSize: 20),
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

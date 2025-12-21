@@ -15,6 +15,7 @@ import '../models/category.dart' as app_models;
 import '../providers/date_range_provider.dart';
 import '../models/date_range.dart';
 import '../widgets/date_range_selector.dart';
+import '../utils/category_emoji_mapper.dart';
 import 'detailed_statistics_screen.dart';
 
 class StatisticsScreen extends StatefulWidget {
@@ -207,9 +208,9 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                               return ListTile(
                                 leading: CircleAvatar(
                                   backgroundColor: category.color,
-                                  child: Icon(
-                                    category.icon,
-                                    color: Colors.white,
+                                  child: Text(
+                                    CategoryEmojiMapper.getEmojiForIcon(category.icon),
+                                    style: const TextStyle(fontSize: 20),
                                   ),
                                 ),
                                 title: Text(category.name),

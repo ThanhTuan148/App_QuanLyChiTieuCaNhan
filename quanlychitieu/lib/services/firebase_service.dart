@@ -20,8 +20,13 @@ class FirebaseService {
   /// Instance của Firestore Database
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  // GoogleSignIn singleton (set clientId for web)
+  final GoogleSignIn _googleSignIn = kIsWeb
+      ? GoogleSignIn(clientId: 'YOUR_CLIENT_ID.apps.googleusercontent.com')
+      : GoogleSignIn();
+
   /// Lấy ID của người dùng hiện tại
-  String? get currentUserId => _auth.currentUser?.uid;
+  String? get currentUserId => _auth.currentUser?.uid; 
 
   // --- AUTHENTICATION & USER PROFILE ---
 
@@ -84,10 +89,10 @@ class FirebaseService {
   /// - Throws exception nếu có lỗi
   Future<auth.User?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) return null;
       final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+          await googleUser.authentication; 
       final credential = auth.GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
@@ -106,7 +111,7 @@ class FirebaseService {
 
   /// Đăng xuất khỏi tài khoản hiện tại
   Future<void> signOut() async {
-    await GoogleSignIn().signOut();
+    await _googleSignIn.signOut();
     await _auth.signOut();
   }
 
