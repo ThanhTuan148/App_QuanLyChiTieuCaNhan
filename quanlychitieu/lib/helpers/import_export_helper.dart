@@ -59,7 +59,7 @@ class ImportExportHelper {
 
       // Thêm tiêu đề báo cáo chính.
       sheet.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('F1'));
-      sheet.cell(CellIndex.indexByString('A1')).value = 'BÁO CÁO CHI TIÊU';
+      sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('BÁO CÁO CHI TIÊU');
       sheet.cell(CellIndex.indexByString('A1')).cellStyle = CellStyle(
         bold: true,
         horizontalAlign: HorizontalAlign.Center,
@@ -68,8 +68,8 @@ class ImportExportHelper {
 
       // Thêm tiêu đề khoảng thời gian.
       sheet.merge(CellIndex.indexByString('A2'), CellIndex.indexByString('F2'));
-      sheet.cell(CellIndex.indexByString('A2')).value =
-          'Tháng ${DateFormat('MM/yyyy').format(expenses.first.date)}'; // Lấy tháng/năm từ khoản chi tiêu đầu tiên
+      sheet.cell(CellIndex.indexByString('A2')).value = TextCellValue(
+          'Tháng ${DateFormat('MM/yyyy').format(expenses.first.date)}'); // Lấy tháng/năm từ khoản chi tiêu đầu tiên
       sheet.cell(CellIndex.indexByString('A2')).cellStyle = CellStyle(
         horizontalAlign: HorizontalAlign.Center,
         fontSize: 12,
@@ -93,19 +93,19 @@ class ImportExportHelper {
       );
 
       // Thêm thông tin tổng quan vào sheet Excel.
-      sheet.cell(CellIndex.indexByString('A4')).value = 'Tổng thu:';
-      sheet.cell(CellIndex.indexByString('B4')).value = currencyFormat.format(
-        totalIncome,
+      sheet.cell(CellIndex.indexByString('A4')).value = TextCellValue('Tổng thu:');
+      sheet.cell(CellIndex.indexByString('B4')).value = TextCellValue(
+        currencyFormat.format(totalIncome),
       );
 
-      sheet.cell(CellIndex.indexByString('A5')).value = 'Tổng chi:';
-      sheet.cell(CellIndex.indexByString('B5')).value = currencyFormat.format(
-        totalExpense,
+      sheet.cell(CellIndex.indexByString('A5')).value = TextCellValue('Tổng chi:');
+      sheet.cell(CellIndex.indexByString('B5')).value = TextCellValue(
+        currencyFormat.format(totalExpense),
       );
 
-      sheet.cell(CellIndex.indexByString('A6')).value = 'Cân đối:';
-      sheet.cell(CellIndex.indexByString('B6')).value = currencyFormat.format(
-        balance,
+      sheet.cell(CellIndex.indexByString('A6')).value = TextCellValue('Cân đối:');
+      sheet.cell(CellIndex.indexByString('B6')).value = TextCellValue(
+        currencyFormat.format(balance),
       );
       // Áp dụng style in đậm cho dòng cân đối.
       sheet.cell(CellIndex.indexByString('A6')).cellStyle = CellStyle(
@@ -120,8 +120,8 @@ class ImportExportHelper {
         bold: true,
         horizontalAlign: HorizontalAlign.Center,
         verticalAlign: VerticalAlign.Center,
-        backgroundColorHex: 'FF4472C4', // Màu xanh dương đậm
-        fontColorHex: 'FFFFFFFF', // Chữ trắng
+        backgroundColorHex: ExcelColor.blue, // Màu xanh dương đậm
+        fontColorHex: ExcelColor.white, // Chữ trắng
         fontSize: 12,
       );
 
@@ -134,7 +134,7 @@ class ImportExportHelper {
             rowIndex: 8,
           ), // Hàng 9 (index 8)
         );
-        cell.value = headers[i];
+        cell.value = TextCellValue(headers[i]);
         cell.cellStyle = headerStyle;
       }
 
@@ -171,34 +171,32 @@ class ImportExportHelper {
         // Điền dữ liệu vào từng ô và áp dụng style.
         // Cột STT
         sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 9 + i))
-          ..value = i + 1
+          ..value = IntCellValue(i + 1)
           ..cellStyle = dataStyle;
 
         // Cột Ngày
         sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: 9 + i))
-          ..value = dateFormat.format(expense.date)
+          ..value = TextCellValue(dateFormat.format(expense.date))
           ..cellStyle = dataStyle;
 
         // Cột Danh mục
         sheet.cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: 9 + i))
-          ..value = category.name
+          ..value = TextCellValue(category.name)
           ..cellStyle = dataStyle;
 
         // Cột Mô tả
         sheet.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: 9 + i))
-          ..value = expense.description
+          ..value = TextCellValue(expense.description)
           ..cellStyle = dataStyle;
 
         // Cột Số tiền
         sheet.cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: 9 + i))
-          ..value =
-              expense.amount
-                  .toString() // Lưu dưới dạng chuỗi
+          ..value = DoubleCellValue(expense.amount)
           ..cellStyle = amountStyle;
 
         // Cột Loại (Thu nhập/Chi tiêu)
         sheet.cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: 9 + i))
-          ..value = expense.isIncome ? 'Thu nhập' : 'Chi tiêu'
+          ..value = TextCellValue(expense.isIncome ? 'Thu nhập' : 'Chi tiêu')
           ..cellStyle = dataStyle;
       }
 

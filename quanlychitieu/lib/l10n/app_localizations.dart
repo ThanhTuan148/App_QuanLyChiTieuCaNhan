@@ -248,3 +248,4 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
+

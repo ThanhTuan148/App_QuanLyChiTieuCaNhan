@@ -67,4 +67,20 @@ class Category {
       userId: data['userId'] ?? '',
     );
   }
+  /// Tạo bản sao Category với các thuộc tính được thay đổi
+  Category copyWith({
+    String? id,
+    String? name,
+    IconData? icon,
+    Color? color,
+    String? userId,
+  }) {
+    return Category(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      icon: icon ?? this.icon,
+      color: color ?? this.color,
+      userId: userId ?? this.userId,
+    );
+  }
 }

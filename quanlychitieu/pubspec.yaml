@@ -37,7 +37,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   # Giao diện
   cupertino_icons: ^1.0.2
-  fl_chart: ^0.66.0
+  fl_chart: ^1.1.1
   google_fonts: ^6.1.0
 
   # Quản lý state
@@ -61,8 +61,8 @@ dependencies:
   pdf: ^3.10.7
   path_provider: ^2.1.1
   #open_file: ^3.3.2
-  excel: ^2.0.0
-  share_plus: ^7.2.1
+  excel: ^4.0.6
+  share_plus: ^12.0.1
 
   # Image picker
   image_picker: ^1.0.5
@@ -70,45 +70,45 @@ dependencies:
   font_awesome_flutter: ^10.7.0
 
   # Thêm các package cần thiết vào pubspec.yaml để quản lý thông báo
-  file_picker: ^8.0.7
+  file_picker: ^10.3.8
   permission_handler: ^12.0.0+1
   flutter_local_notifications: ^19.2.1
   timezone: ^0.10.1
 
   # Firebase - Đồng bộ dữ liệu cloud
-  firebase_core: ^2.27.2
-  firebase_auth: ^4.17.7
-  cloud_firestore: ^4.15.8
-  firebase_storage: ^11.6.9
-  device_info_plus: ^9.1.1
-  google_sign_in: ^6.3.0
-  flutter_facebook_auth: ^6.0.4
+  firebase_core: ^3.15.2
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.6.12
+  firebase_storage: ^12.4.10
+  device_info_plus: ^12.3.0
+  google_sign_in: ^7.2.0
+  flutter_facebook_auth: ^7.1.2
 
   # Payment integrations
   http: ^1.2.0
   url_launcher: ^6.2.5
 
   # AI & Machine Learning
-  tflite_flutter: ^0.9.0
+  tflite_flutter: ^0.12.1
   # tflite_flutter_helper: ^0.2.1  # Commented out due to dependency conflict
 
   # Chat & UI enhancements
-  fluttertoast: ^8.2.4
+  fluttertoast: ^9.0.0
 
   # Crypto for payment signatures
   crypto: ^3.0.3
 
   # Business features - Groups & Teams
-  firebase_dynamic_links: ^5.2.4
-  firebase_messaging: ^14.7.10
+  firebase_dynamic_links: ^6.1.10
+  firebase_messaging: ^15.2.10
   
   # Offline storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
 
   # Advanced features - OCR
-  google_mlkit_text_recognition: ^0.6.0
-  google_mlkit_commons: ^0.3.0
+  google_mlkit_text_recognition: ^0.15.0
+  google_mlkit_commons: ^0.11.0
   
   # UI/UX Enhancements
   dynamic_color: ^1.5.0
@@ -119,7 +119,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
+  flutter_lints: ^6.0.0
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

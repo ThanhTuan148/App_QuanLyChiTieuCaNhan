@@ -600,7 +600,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Đóng'),
+              child: Text(AppLocalizations.of(context)?.close ?? 'Đóng'),
             ),
           ],
         ),

@@ -109,7 +109,7 @@ class ExportProvider with ChangeNotifier {
 
       // Thiết lập tiêu đề báo cáo và khoảng thời gian.
       sheet.merge(CellIndex.indexByString('A1'), CellIndex.indexByString('F1'));
-      sheet.cell(CellIndex.indexByString('A1')).value = 'BÁO CÁO CHI TIÊU';
+      sheet.cell(CellIndex.indexByString('A1')).value = TextCellValue('BÁO CÁO CHI TIÊU');
       sheet.cell(CellIndex.indexByString('A1')).cellStyle = CellStyle(
         bold: true,
         horizontalAlign: HorizontalAlign.Center,
@@ -117,8 +117,8 @@ class ExportProvider with ChangeNotifier {
       );
 
       sheet.merge(CellIndex.indexByString('A2'), CellIndex.indexByString('F2'));
-      sheet.cell(CellIndex.indexByString('A2')).value =
-          'Khoảng thời gian: ${dateRange.displayText}';
+      sheet.cell(CellIndex.indexByString('A2')).value = TextCellValue(
+          'Khoảng thời gian: ${dateRange.displayText}');
       sheet.cell(CellIndex.indexByString('A2')).cellStyle = CellStyle(
         horizontalAlign: HorizontalAlign.Center,
         fontSize: 12,
@@ -135,19 +135,19 @@ class ExportProvider with ChangeNotifier {
 
       final balance = totalIncome - totalExpense;
 
-      sheet.cell(CellIndex.indexByString('A4')).value = 'Tổng thu:';
-      sheet.cell(CellIndex.indexByString('B4')).value = currencyFormat.format(
-        totalIncome,
+      sheet.cell(CellIndex.indexByString('A4')).value =  TextCellValue('Tổng thu:');
+      sheet.cell(CellIndex.indexByString('B4')).value = TextCellValue(
+        currencyFormat.format(totalIncome),
       );
 
-      sheet.cell(CellIndex.indexByString('A5')).value = 'Tổng chi:';
-      sheet.cell(CellIndex.indexByString('B5')).value = currencyFormat.format(
-        totalExpense,
+      sheet.cell(CellIndex.indexByString('A5')).value =  TextCellValue('Tổng chi:');
+      sheet.cell(CellIndex.indexByString('B5')).value = TextCellValue(
+        currencyFormat.format(totalExpense),
       );
 
-      sheet.cell(CellIndex.indexByString('A6')).value = 'Cân đối:';
-      sheet.cell(CellIndex.indexByString('B6')).value = currencyFormat.format(
-        balance,
+      sheet.cell(CellIndex.indexByString('A6')).value =  TextCellValue('Cân đối:');
+      sheet.cell(CellIndex.indexByString('B6')).value = TextCellValue(
+        currencyFormat.format(balance),
       );
       sheet.cell(CellIndex.indexByString('A6')).cellStyle = CellStyle(
         bold: true,
@@ -161,7 +161,7 @@ class ExportProvider with ChangeNotifier {
       for (var i = 0; i < headers.length; i++) {
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 8))
-            .value = headers[i];
+            .value = TextCellValue(headers[i]);
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 8))
             .cellStyle = CellStyle(
@@ -177,22 +177,22 @@ class ExportProvider with ChangeNotifier {
 
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: 9 + i))
-            .value = (i + 1);
+            .value = IntCellValue(i + 1);
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: 9 + i))
-            .value = dateFormat.format(expense.date);
+            .value = TextCellValue(dateFormat.format(expense.date));
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: 9 + i))
-            .value = category.name;
+            .value = TextCellValue(category.name);
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: 9 + i))
-            .value = expense.description;
+            .value = TextCellValue(expense.description);
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: 9 + i))
-            .value = expense.amount.toString();
+            .value = DoubleCellValue(expense.amount);
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: 9 + i))
-            .value = (expense.isIncome ? 'Thu nhập' : 'Chi tiêu');
+            .value = TextCellValue(expense.isIncome ? 'Thu nhập' : 'Chi tiêu');
 
         // Áp dụng màu sắc cho cột 'Loại' (mặc dù hiện tại không có màu trực tiếp).
         if (expense.isIncome) {

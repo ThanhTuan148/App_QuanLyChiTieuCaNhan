@@ -47,11 +47,11 @@ class ExcelExportHelper {
         final cell = sheet.cell(
           CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0),
         );
-        cell.value = headers[i];
+        cell.value = TextCellValue(headers[i]);
         cell.cellStyle = CellStyle(
           bold: true,
           horizontalAlign: HorizontalAlign.Center,
-          backgroundColorHex: 'FFD3D3D3',
+          backgroundColorHex: ExcelColor.grey,
         );
       }
 
@@ -71,22 +71,22 @@ class ExcelExportHelper {
 
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: i + 1))
-            .value = i + 1;
+            .value = TextCellValue((i + 1).toString());
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: i + 1))
-            .value = dateFormat.format(expense.date);
+            .value = TextCellValue(dateFormat.format(expense.date));
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: i + 1))
-            .value = category.name;
+            .value = TextCellValue(category.name);
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: i + 1))
-            .value = expense.description;
+            .value = TextCellValue(expense.description);
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 4, rowIndex: i + 1))
-            .value = expense.amount;
+            .value = TextCellValue(expense.amount.toString());
         sheet
             .cell(CellIndex.indexByColumnRow(columnIndex: 5, rowIndex: i + 1))
-            .value = expense.isIncome ? 'Thu nhập' : 'Chi tiêu';
+            .value = TextCellValue(expense.isIncome ? 'Thu nhập' : 'Chi tiêu');
       }
 
       final directory = await getApplicationDocumentsDirectory();
