@@ -18,7 +18,7 @@ class GroqAIService {
   //    Windows: set GROQ_API_KEY=your-key-here
   //    Linux/Mac: export GROQ_API_KEY=your-key-here
   // 2. Hoặc sửa trực tiếp dòng dưới (chỉ để test, không commit vào Git):
-  static const String _hardcodedApiKey = ''; // ⚠️ KHÔNG commit API key vào Git!
+  static const String _hardcodedApiKey = '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'; // ⚠️ KHÔNG commit API key vào Git!
   
   static String get _apiKey {
     // Ưu tiên: Lấy từ environment variable

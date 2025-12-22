@@ -129,6 +129,9 @@
       <excludeFolder url="file://$MODULE_DIR$/quanlychitieu/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/example/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/quanlychitieu/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/example/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/quanlychitieu/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows/example/build" />
+      <excludeFolder url="file://$MODULE_DIR$/App_QuanLyChiTieuCaNhan/quanlychitieu/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/App_QuanLyChiTieuCaNhan/quanlychitieu/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/App_QuanLyChiTieuCaNhan/quanlychitieu/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

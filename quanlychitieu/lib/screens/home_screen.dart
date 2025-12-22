@@ -43,6 +43,8 @@ import 'ai_chat_screen.dart';
 import 'groups_screen.dart';
 import 'expense_prediction_screen.dart';
 import 'debt_management_screen.dart';
+import 'calendar_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -51,22 +53,17 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  late AnimationController _floatAnimationController;
+  String _currentView = 'Chi tiết'; // Chi tiết hoặc Lịch
 
   @override
   void initState() {
     super.initState();
-    _floatAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat(reverse: true);
   }
 
   @override
   void dispose() {
-    _floatAnimationController.dispose();
     super.dispose();
   }
 
@@ -108,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     _buildBalanceCard(context, balance, totalIncome, totalExpense),
                     const SizedBox(height: 24),
                     // Statistics Section
-                    _buildStatisticsSection(context),
+                    _buildStatisticsSection(context, expenses),
                     const SizedBox(height: 24),
                     // Recent Transactions
                     _buildRecentTransactions(context, expenses),
@@ -118,6 +115,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(
+    BuildContext context,
+    String emoji,
+    String label,
+    VoidCallback onPressed, {
+    bool isActive = false,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colorScheme = Theme.of(context).colorScheme;
+    
+    return Tooltip(
+      message: label,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? colorScheme.primary.withOpacity(0.1)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              emoji,
+              style: const TextStyle(fontSize: 20),
+            ),
+          ),
         ),
       ),
     );
@@ -170,73 +202,110 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildHeader(BuildContext context, AppUser? user) {
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 48, 24, 16),
-      child: Row(
+      child: Column(
         children: [
-          // Drawer menu button
-          Builder(
-            builder: (context) => IconButton(
-              icon: Icon(
-                Icons.menu,
-                color: isDark ? Colors.white : Colors.grey[900],
-              ),
-              onPressed: () => Scaffold.of(context).openDrawer(),
-            ),
-          ),
-          const SizedBox(width: 8),
-          // Avatar
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: Theme.of(context).primaryColor,
-                width: 2,
-              ),
-            ),
-            child: ClipOval(
-              child: _buildAvatarImage(context, user),
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Welcome text
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome back,',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  user?.username ?? 'User',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+          // First row: Menu, Avatar, Welcome, Theme
+          Row(
+            children: [
+              // Drawer menu button
+              Builder(
+                builder: (context) => IconButton(
+                  icon: Icon(
+                    Icons.menu,
                     color: isDark ? Colors.white : Colors.grey[900],
                   ),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
                 ),
-              ],
-            ),
-          ),
-          // Theme toggle button
-          Consumer<ThemeProvider>(
-            builder: (context, themeProvider, child) {
-              return ThemeSwitch(
-                value: themeProvider.isDarkMode,
-                onChanged: (value) {
-                  themeProvider.toggleDarkMode();
-                },
-              );
-            },
+              ),
+              const SizedBox(width: 8),
+              // Avatar
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Theme.of(context).primaryColor,
+                    width: 2,
+                  ),
+                ),
+                child: ClipOval(
+                  child: _buildAvatarImage(context, user),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Welcome text
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context)?.welcomeBack ?? 'Welcome back,',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      user?.username ?? AppLocalizations.of(context)?.user ?? 'User',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.grey[900],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Search, Chi tiết, Lịch buttons
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Search button
+                  _buildActionButton(
+                    context,
+                    '🔍',
+                    AppLocalizations.of(context)?.search ?? 'Tìm kiếm',
+                    () {
+                      // TODO: Implement search functionality
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                  // Chi tiết button
+                  _buildActionButton(
+                    context,
+                    '🛒',
+                    AppLocalizations.of(context)?.details ?? 'Chi tiết',
+                    () {
+                      setState(() => _currentView = 'Chi tiết');
+                    },
+                    isActive: _currentView == 'Chi tiết',
+                  ),
+                  const SizedBox(width: 8),
+                  // Lịch button
+                  _buildActionButton(
+                    context,
+                    '📅',
+                    AppLocalizations.of(context)?.calendar ?? 'Lịch',
+                    () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (ctx) => const CalendarScreen(),
+                        ),
+                      );
+                    },
+                    isActive: _currentView == 'Lịch',
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
@@ -252,12 +321,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currencyFormat = context.read<CurrencyProvider>().currencyFormat;
 
-    return AnimatedBuilder(
-      animation: _floatAnimationController,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(0, _floatAnimationController.value * 5),
-          child: Container(
+    return Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -281,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Total Balance',
+                  AppLocalizations.of(context)?.totalBalance ?? 'Tổng số dư',
                   style: TextStyle(
                     color: Colors.green[100],
                     fontSize: 14,
@@ -310,7 +374,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         child: _buildBalanceItem(
                           context,
                           Icons.arrow_downward,
-                          'Income',
+                          AppLocalizations.of(context)?.income ?? 'Thu nhập',
                           income,
                           true,
                         ),
@@ -320,11 +384,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         height: 32,
                         color: Colors.white.withOpacity(0.3),
                       ),
+                      const SizedBox(width: 12),
                       Expanded(
                         child: _buildBalanceItem(
                           context,
                           Icons.arrow_upward,
-                          'Expense',
+                          AppLocalizations.of(context)?.expense ?? 'Chi tiêu',
                           expense,
                           false,
                         ),
@@ -334,9 +399,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ],
             ),
-          ),
-        );
-      },
     );
   }
 
@@ -394,7 +456,57 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildStatisticsSection(BuildContext context) {
+  Widget _buildStatisticsSection(BuildContext context, List<Expense> expenses) {
+    final expenseProvider = context.read<ExpenseProvider>();
+    final categoryProvider = context.read<CategoryProvider>();
+    final currencyFormat = context.read<CurrencyProvider>().currencyFormat;
+    
+    // Tính toán chi tiêu theo category
+    final Map<String, double> categoryExpenses = {};
+    double totalExpenseAmount = 0;
+    
+    for (var expense in expenses.where((e) => !e.isIncome)) {
+      final category = categoryProvider.findById(expense.categoryId);
+      if (category.id != 'not_found') {
+        final categoryName = category.name;
+        categoryExpenses[categoryName] = (categoryExpenses[categoryName] ?? 0) + expense.amount;
+        totalExpenseAmount += expense.amount;
+      }
+    }
+    
+    // Lấy category có chi tiêu cao nhất
+    String? topCategory;
+    double topCategoryAmount = 0;
+    if (categoryExpenses.isNotEmpty) {
+      categoryExpenses.forEach((name, amount) {
+        if (amount > topCategoryAmount) {
+          topCategoryAmount = amount;
+          topCategory = name;
+        }
+      });
+    }
+    
+    // Tính toán chi tiêu theo tuần (7 ngày gần nhất)
+    final now = DateTime.now();
+    final weekData = List.generate(7, (index) {
+      final date = now.subtract(Duration(days: 6 - index));
+      final dayExpenses = expenses.where((e) {
+        return !e.isIncome &&
+            e.date.year == date.year &&
+            e.date.month == date.month &&
+            e.date.day == date.day;
+      }).toList();
+      final amount = dayExpenses.fold<double>(0, (sum, e) => sum + e.amount);
+      return {'date': date, 'amount': amount};
+    });
+    
+    final weekExpenses = weekData.map((d) => d['amount'] as double).toList();
+    final weekDates = weekData.map((d) => d['date'] as DateTime).toList();
+    
+    final maxWeekExpense = weekExpenses.isEmpty || weekExpenses.every((e) => e == 0)
+        ? 1.0 
+        : weekExpenses.reduce((a, b) => a > b ? a : b);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -402,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Statistics',
+              AppLocalizations.of(context)?.statistics ?? 'Thống kê',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -421,7 +533,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 );
               },
               child: Text(
-                'See All',
+                AppLocalizations.of(context)?.seeAll ?? 'Xem tất cả',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontSize: 14,
@@ -435,11 +547,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         Row(
           children: [
             Expanded(
-              child: _buildPieChartCard(context),
+              child: _buildPieChartCard(
+                context, 
+                topCategory, 
+                topCategoryAmount, 
+                totalExpenseAmount,
+                currencyFormat,
+              ),
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: _buildBarChartCard(context),
+              child: _buildBarChartCard(context, weekExpenses, weekDates, maxWeekExpense),
             ),
           ],
         ),
@@ -447,8 +565,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildPieChartCard(BuildContext context) {
+  Widget _buildPieChartCard(
+    BuildContext context,
+    String? topCategory,
+    double topCategoryAmount,
+    double totalExpenseAmount,
+    NumberFormat currencyFormat,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final percentage = totalExpenseAmount > 0 
+        ? (topCategoryAmount / totalExpenseAmount).clamp(0.0, 1.0)
+        : 0.0;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -476,7 +603,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               children: [
                 // Pie chart simulation
                 CircularProgressIndicator(
-                  value: 0.65,
+                  value: percentage,
                   strokeWidth: 12,
                   backgroundColor: Colors.grey[200],
                   valueColor: AlwaysStoppedAnimation<Color>(
@@ -492,11 +619,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   ),
                   child: Center(
                     child: Text(
-                      'Oct',
+                      '${(percentage * 100).toStringAsFixed(0)}%',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.grey[400] : Colors.grey[500],
+                        color: Theme.of(context).primaryColor,
                       ),
                     ),
                   ),
@@ -506,20 +633,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           ),
           const SizedBox(height: 12),
           Text(
-            'Spending',
+            topCategory ?? (AppLocalizations.of(context)?.noData ?? 'Chưa có dữ liệu'),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,
               color: isDark ? Colors.grey[400] : Colors.grey[600],
             ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
+          if (topCategoryAmount > 0) ...[
+            const SizedBox(height: 4),
+            Text(
+              currencyFormat.format(topCategoryAmount),
+              style: TextStyle(
+                fontSize: 11,
+                color: isDark ? Colors.grey[500] : Colors.grey[500],
+              ),
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildBarChartCard(BuildContext context) {
+  Widget _buildBarChartCard(
+    BuildContext context,
+    List<double> weekExpenses,
+    List<DateTime> weekDates,
+    double maxExpense,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasData = weekExpenses.any((e) => e > 0);
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -539,22 +685,63 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
       child: Column(
         children: [
-          SizedBox(
-            height: 96,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildBar(context, 0.4, isDark),
-                _buildBar(context, 0.7, isDark),
-                _buildBar(context, 0.55, isDark),
-                _buildBar(context, 0.85, isDark),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
+          !hasData
+              ? SizedBox(
+                  height: 96,
+                  child: Center(
+                    child: Text(
+                      AppLocalizations.of(context)?.noData ?? 'Chưa có dữ liệu',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey[500] : Colors.grey[500],
+                      ),
+                    ),
+                  ),
+                )
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 96,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(weekExpenses.length, (index) {
+                          final expense = weekExpenses[index];
+                          final height = maxExpense > 0 
+                              ? (expense / maxExpense).clamp(0.1, 1.0)
+                              : 0.1;
+                          return Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 2),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(
+                                    child: _buildBar(context, height, isDark),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${weekDates[index].day}/${weekDates[index].month}',
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      color: isDark ? Colors.grey[500] : Colors.grey[600],
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ],
+                ),
+          const SizedBox(height: 4),
           Text(
-            'Weekly Activity',
+            AppLocalizations.of(context)?.last7Days ?? '7 ngày gần nhất',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w500,

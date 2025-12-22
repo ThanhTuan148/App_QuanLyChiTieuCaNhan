@@ -20,6 +20,8 @@ import '../providers/category_provider.dart';
 import '../providers/expense_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/currency_provider.dart';
+import '../providers/language_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'reminder_screen.dart';
 import '../providers/date_range_provider.dart';
 import 'login_screen.dart';
@@ -62,7 +64,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     _buildProfileSection(context, user),
                     const SizedBox(height: 32),
                     // General Section
-                    _buildGeneralSection(context, themeProvider, currencyProvider),
+                    _buildGeneralSection(context, themeProvider, currencyProvider, context.watch<LanguageProvider>()),
                     const SizedBox(height: 24),
                     // Category Management Section
                     _buildCategoryManagementSection(context, categoryProvider),
@@ -101,7 +103,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           Expanded(
             child: Text(
-              'Cài đặt',
+              AppLocalizations.of(context)?.settings ?? 'Cài đặt',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 20,
@@ -221,7 +223,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildGeneralSection(BuildContext context, ThemeProvider themeProvider, CurrencyProvider currencyProvider) {
+  Widget _buildGeneralSection(BuildContext context, ThemeProvider themeProvider, CurrencyProvider currencyProvider, LanguageProvider languageProvider) {
     final isDark = themeProvider.isDarkMode;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,7 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            'GENERAL',
+            AppLocalizations.of(context)?.general ?? 'GENERAL',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -256,7 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 icon: Icons.dark_mode,
                 iconColor: Colors.blue,
-                title: 'Dark Mode',
+                title: AppLocalizations.of(context)?.darkMode ?? 'Dark Mode',
                 trailing: ThemeSwitch(
                   value: themeProvider.isDarkMode,
                   onChanged: (value) {
@@ -269,7 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 icon: Icons.attach_money,
                 iconColor: Colors.green,
-                title: 'Currency',
+                title: AppLocalizations.of(context)?.currency ?? 'Currency',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -293,9 +295,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _buildDivider(context),
               _buildSettingsItem(
                 context,
+                icon: Icons.language,
+                iconColor: Colors.blue,
+                title: AppLocalizations.of(context)?.language ?? 'Language',
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      languageProvider.getLanguageName(languageProvider.currentLanguage),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.chevron_right,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      size: 20,
+                    ),
+                  ],
+                ),
+                onTap: () => _showLanguageDialog(context, languageProvider),
+              ),
+              _buildDivider(context),
+              _buildSettingsItem(
+                context,
                 icon: Icons.palette,
                 iconColor: themeProvider.selectedColor,
-                title: 'Theme Color',
+                title: AppLocalizations.of(context)?.themeColor ?? 'Theme Color',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -326,7 +354,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 icon: Icons.notifications,
                 iconColor: Colors.orange,
-                title: 'Notifications',
+                title: AppLocalizations.of(context)?.notifications ?? 'Notifications',
                 trailing: Icon(
                   Icons.chevron_right,
                   color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -354,7 +382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            'QUẢN LÝ',
+            AppLocalizations.of(context)?.management ?? 'QUẢN LÝ',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -381,7 +409,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 context,
                 icon: Icons.category,
                 iconColor: Colors.blue,
-                title: 'Quản lý danh mục',
+                title: AppLocalizations.of(context)?.categoryManagement ?? 'Quản lý danh mục',
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -521,6 +549,61 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text('Thêm mới'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context, LanguageProvider languageProvider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final languages = LanguageProvider.getSupportedLanguages();
+    
+    String selectedLanguage = languageProvider.currentLanguage;
+    
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(AppLocalizations.of(context)?.selectLanguage ?? 'Chọn ngôn ngữ'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: languages.length,
+              itemBuilder: (context, index) {
+                final language = languages[index];
+                final isSelected = selectedLanguage == language['code'];
+                return RadioListTile<String>(
+                  title: Text(language['nativeName']!),
+                  subtitle: Text(language['name']!),
+                  value: language['code']!,
+                  groupValue: selectedLanguage,
+                  activeColor: Theme.of(context).primaryColor,
+                  onChanged: (value) async {
+                    setState(() {
+                      selectedLanguage = value!;
+                    });
+                    
+                    // Save to provider
+                    await languageProvider.changeLanguage(selectedLanguage);
+                    
+                    if (context.mounted) {
+                      Navigator.of(ctx).pop();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(AppLocalizations.of(context)?.languageChanged(language['nativeName']!) ?? 'Đã chọn ${language['nativeName']}')),
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Đóng'),
+            ),
+          ],
+        ),
       ),
     );
   }

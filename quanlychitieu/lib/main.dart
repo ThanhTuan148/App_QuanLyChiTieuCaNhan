@@ -2,8 +2,10 @@
 // Chứa các cấu hình cơ bản và khởi tạo ứng dụng
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
 
 // Import các provider để quản lý state
@@ -17,8 +19,10 @@ import 'providers/date_range_provider.dart';
 import 'providers/group_provider.dart';
 import 'providers/debt_provider.dart';
 import 'providers/currency_provider.dart';
+import 'providers/language_provider.dart';
 import 'providers/chat_history_provider.dart';
 import 'models/date_range.dart';
+import 'l10n/app_localizations.dart';
 
 // Import các màn hình chính
 import 'screens/login_screen.dart';
@@ -36,6 +40,10 @@ void main() async {
 
   // Khởi tạo Firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Khởi tạo date formatting cho locale tiếng Việt
+  await initializeDateFormatting('vi', null);
+  
   runApp(const MyApp());
 }
 
@@ -54,6 +62,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DateRangeProvider()),
         // Provider quản lý tiền tệ
         ChangeNotifierProvider(create: (_) => CurrencyProvider()..loadCurrency()),
+        // Provider quản lý ngôn ngữ
+        ChangeNotifierProvider(create: (_) => LanguageProvider()..loadLanguage()),
         // Provider quản lý xác thực người dùng
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         // Provider quản lý chi tiêu, phụ thuộc vào AuthProvider
@@ -129,14 +139,25 @@ class MyApp extends StatelessWidget {
               },
         ),
       ],
-      // Sử dụng Consumer để lắng nghe thay đổi theme
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      // Sử dụng Consumer để lắng nghe thay đổi theme và ngôn ngữ
+      child: Consumer2<ThemeProvider, LanguageProvider>(
+        builder: (context, themeProvider, languageProvider, child) {
           return MaterialApp(
             title: 'Quản lý Chi tiêu',
             theme: themeProvider.lightTheme,
             darkTheme: themeProvider.darkTheme,
             themeMode: themeProvider.themeMode,
+            locale: Locale(languageProvider.localeCode, languageProvider.localeCountryCode),
+            supportedLocales: const [
+              Locale('vi', 'VN'),
+              Locale('en', 'US'),
+            ],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              AppLocalizations.delegate,
+            ],
             home: const AuthWrapper(),
             debugShowCheckedModeBanner: false,
           );

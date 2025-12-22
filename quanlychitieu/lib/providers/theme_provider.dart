@@ -64,7 +64,12 @@ class ThemeProvider with ChangeNotifier {
   /// Theme cho chế độ sáng - Green theme từ HTML
   ThemeData get lightTheme {
     return ThemeData(
+      useMaterial3: true, // ✅ Material Design 3
       brightness: Brightness.light,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _selectedColor,
+        brightness: Brightness.light,
+      ),
       primarySwatch: _createMaterialColor(_selectedColor),
       primaryColor: _selectedColor,
       indicatorColor: _selectedColor,
@@ -108,7 +113,7 @@ class ThemeProvider with ChangeNotifier {
         color: Colors.white,
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24), // ✅ Tăng từ 16 lên 24
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -131,7 +136,7 @@ class ThemeProvider with ChangeNotifier {
           elevation: 4,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20), // ✅ Tăng bo góc
           ),
           textStyle: const TextStyle(
             fontFamily: 'Poppins',
@@ -147,12 +152,17 @@ class ThemeProvider with ChangeNotifier {
   /// Theme cho chế độ tối - Green dark theme từ HTML
   ThemeData get darkTheme {
     return ThemeData(
+      useMaterial3: true, // ✅ Material Design 3
       brightness: Brightness.dark,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: _selectedColor,
+        brightness: Brightness.dark,
+      ),
       primarySwatch: _createMaterialColor(_selectedColor),
       primaryColor: _selectedColor,
       indicatorColor: _selectedColor,
-      scaffoldBackgroundColor: const Color(0xFF0B140E), // background-dark
-      cardColor: const Color(0xFF16261B), // card-dark
+      scaffoldBackgroundColor: const Color(0xFF0A0E0B), // ✅ Đen hơn một chút
+      cardColor: const Color(0xFF1A1F1C), // ✅ Sáng hơn một chút
       fontFamily: 'Poppins',
       textTheme: const TextTheme(
         displayLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold, color: Color(0xFFECFDF5)),
@@ -188,10 +198,10 @@ class ThemeProvider with ChangeNotifier {
         elevation: 8,
       ),
       cardTheme: CardThemeData(
-        color: const Color(0xFF16261B), // card-dark
+        color: const Color(0xFF1A1F1C), // ✅ card-dark cải thiện
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(24), // ✅ Tăng từ 16 lên 24
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -214,7 +224,7 @@ class ThemeProvider with ChangeNotifier {
           elevation: 4,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20), // ✅ Tăng bo góc
           ),
           textStyle: const TextStyle(
             fontFamily: 'Poppins',
