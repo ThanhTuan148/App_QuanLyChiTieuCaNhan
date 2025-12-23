@@ -194,19 +194,49 @@ class _AddEditReminderScreenState extends State<AddEditReminderScreen> {
       await context.read<ReminderProvider>().saveReminder(newReminder);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Đã lưu nhắc nhở!'),
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _isEditing 
+                        ? 'Đã cập nhật nhắc nhở thành công!' 
+                        : 'Đã thêm nhắc nhở thành công!',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
             backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.of(context).pop();
+        // Đợi một chút để đảm bảo stream đã cập nhật
+        await Future.delayed(const Duration(milliseconds: 300));
+        Navigator.of(context).pop(true); // Trả về true để báo hiệu đã lưu thành công
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Lưu thất bại: $e'),
+            content: Row(
+              children: [
+                const Icon(Icons.error, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Lưu thất bại: $e',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }

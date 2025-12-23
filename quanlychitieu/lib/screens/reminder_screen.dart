@@ -15,8 +15,24 @@ import '../providers/reminder_provider.dart';
 // [SỬA] Import đúng file màn hình thêm/sửa
 import 'add_reminder_screen.dart';
 
-class ReminderScreen extends StatelessWidget {
+class ReminderScreen extends StatefulWidget {
   const ReminderScreen({super.key});
+
+  @override
+  State<ReminderScreen> createState() => _ReminderScreenState();
+}
+
+class _ReminderScreenState extends State<ReminderScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Đảm bảo provider được khởi tạo và lắng nghe stream
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final reminderProvider = context.read<ReminderProvider>();
+      // Stream sẽ tự động cập nhật, nhưng đảm bảo provider được refresh
+      reminderProvider.notifyListeners();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,27 +46,92 @@ class ReminderScreen extends StatelessWidget {
           // Nút thêm nhắc nhở mới
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              // [SỬA] Điều hướng đến đúng tên class AddEditReminderScreen
-              Navigator.of(context).push(
+            onPressed: () async {
+              // Điều hướng đến màn hình thêm nhắc nhở và đợi kết quả
+              final result = await Navigator.of(context).push<bool>(
                 MaterialPageRoute(
                   builder: (ctx) => const AddEditReminderScreen(),
                 ),
               );
+              // Nếu lưu thành công, refresh lại provider
+              if (result == true && mounted) {
+                // Stream sẽ tự động cập nhật, nhưng đảm bảo UI được refresh
+                reminderProvider.notifyListeners();
+              }
             },
           ),
         ],
       ),
-      body:
-          reminderProvider.reminders.isEmpty
-              ? const Center(child: Text('Chưa có nhắc nhở nào.'))
-              : ListView.builder(
+      body: reminderProvider.reminders.isEmpty
+          ? _buildEmptyState(context)
+          : RefreshIndicator(
+              onRefresh: () async {
+                // Stream sẽ tự động cập nhật, nhưng refresh để đảm bảo
+                reminderProvider.notifyListeners();
+                await Future.delayed(const Duration(milliseconds: 500));
+              },
+              child: ListView.builder(
                 itemCount: reminderProvider.reminders.length,
                 itemBuilder: (ctx, index) {
                   final reminder = reminderProvider.reminders[index];
                   return _buildReminderCard(context, reminder);
                 },
               ),
+            ),
+    );
+  }
+
+  /// Xây dựng UI khi chưa có nhắc nhở nào
+  Widget _buildEmptyState(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.notifications_none,
+            size: 80,
+            color: isDark ? Colors.grey[400] : Colors.grey[600],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Chưa có nhắc nhở nào',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.grey[300] : Colors.grey[700],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              'Thêm nhắc nhở để không bỏ lỡ các khoản chi tiêu quan trọng',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.grey[400] : Colors.grey[500],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.add),
+            label: const Text('Thêm nhắc nhở'),
+            onPressed: () async {
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (ctx) => const AddEditReminderScreen(),
+                ),
+              );
+              if (result == true && mounted) {
+                context.read<ReminderProvider>().notifyListeners();
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 

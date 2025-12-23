@@ -71,6 +71,11 @@ class GroupProvider with ChangeNotifier {
     });
   }
 
+  /// Làm mới danh sách nhóm thủ công (ví dụ pull-to-refresh)
+  Future<void> refreshGroups() async {
+    _listenToGroups();
+  }
+
   /// Tạo nhóm mới
   Future<Group> createGroup({
     required String name,

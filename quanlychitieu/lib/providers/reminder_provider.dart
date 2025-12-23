@@ -87,6 +87,10 @@ class ReminderProvider with ChangeNotifier {
   /// @param reminder Đối tượng nhắc nhở cần lưu (có thể là mới hoặc cập nhật).
   Future<void> saveReminder(Reminder reminder) async {
     await _firebaseService.saveReminder(reminder);
+    // Stream sẽ tự động cập nhật từ Firebase, nhưng đảm bảo UI được refresh
+    // Đợi một chút để stream có thời gian cập nhật
+    await Future.delayed(const Duration(milliseconds: 100));
+    notifyListeners();
   }
 
   /// Xóa một nhắc nhở khỏi Firebase và hủy thông báo tương ứng.

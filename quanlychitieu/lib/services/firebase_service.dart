@@ -112,34 +112,42 @@ class FirebaseService {
   // }
   Future<auth.User?> signInWithGoogle() async {
     try {
-      await _googleSignIn.initialize(
-        clientId: kIsWeb
-            ? 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com'
-            : null,
-      );
+      if (kIsWeb) {
+        // Trên web, google_sign_in package không hỗ trợ đầy đủ
+        // Firebase Auth trên web cần cấu hình đặc biệt
+        // Tạm thời thông báo rằng tính năng này chưa hỗ trợ trên web
+        throw UnimplementedError(
+          'Google Sign-In trên web chưa được hỗ trợ đầy đủ trong phiên bản hiện tại. '
+          'Vui lòng sử dụng đăng nhập bằng email/password hoặc chạy ứng dụng trên mobile.',
+        );
+      } else {
+        // Trên mobile, sử dụng google_sign_in package
+        await _googleSignIn.initialize();
 
-      final GoogleSignInAccount? googleUser =
-      await _googleSignIn.authenticate();
+        // Sử dụng authenticate() trên mobile
+        final GoogleSignInAccount? googleUser = await _googleSignIn.authenticate();
 
-      if (googleUser == null) return null;
+        if (googleUser == null) return null;
 
-      final GoogleSignInAuthentication googleAuth =
-      await googleUser.authentication;
+        // Lấy thông tin authentication
+        final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
-      final credential = auth.GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-      );
+        // Tạo credential từ Google authentication
+        final credential = auth.GoogleAuthProvider.credential(
+          idToken: googleAuth.idToken,
+        );
 
-      final userCredential =
-      await _auth.signInWithCredential(credential);
+        // Đăng nhập vào Firebase với credential
+        final userCredential = await _auth.signInWithCredential(credential);
 
-      final user = userCredential.user;
+        final user = userCredential.user;
 
-      if (user != null) {
-        await _updateUserInFirestore(user);
+        if (user != null) {
+          await _updateUserInFirestore(user);
+        }
+
+        return user;
       }
-
-      return user;
     } catch (e) {
       debugPrint('Lỗi đăng nhập Google: $e');
       rethrow;
@@ -148,7 +156,17 @@ class FirebaseService {
 
   /// Đăng xuất
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    // Đăng xuất Google Sign-In (nếu có)
+    // Bọc trong try-catch để tránh lỗi nếu plugin chưa được khởi tạo (đặc biệt trên web)
+    try {
+      await _googleSignIn.signOut();
+    } catch (e) {
+      // Bỏ qua lỗi nếu Google Sign-In chưa được khởi tạo hoặc không có người dùng đăng nhập Google
+      // Điều này xảy ra khi người dùng đăng nhập bằng email/password thay vì Google
+      debugPrint('Lỗi khi đăng xuất Google Sign-In (có thể bỏ qua): $e');
+    }
+    
+    // Luôn đăng xuất Firebase Auth
     await _auth.signOut();
   }
 

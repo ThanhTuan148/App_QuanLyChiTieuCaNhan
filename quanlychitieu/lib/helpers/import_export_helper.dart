@@ -120,8 +120,6 @@ class ImportExportHelper {
         bold: true,
         horizontalAlign: HorizontalAlign.Center,
         verticalAlign: VerticalAlign.Center,
-        backgroundColorHex: ExcelColor.blue, // Màu xanh dương đậm
-        fontColorHex: ExcelColor.white, // Chữ trắng
         fontSize: 12,
       );
 
